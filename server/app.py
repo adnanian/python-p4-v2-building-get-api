@@ -20,6 +20,56 @@ def index():
     return "Index for Game/Review/User API"
 
 # start building your API here
+@app.route('/games')
+def games():
+    """
+    Long way to do things
+    
+    # Query games and convert them to list.
+    games = []
+    for game in Game.query.order_by(Game.title).all():
+        game_dict = {
+            "title": game.title,
+            "genre": game.genre,
+            "platform": game.platform,
+            "price": game.price
+        }
+        games.append(game_dict)
+    # Make response; convert to JSON and return
+    # 1st way, use jsonify() - headers not needed
+    #response = make_response(jsonify(games), 200)
+    # 2nd way, without jsonify(), need headers
+    response = make_response(games, 200, {"Content-Type": "application/json"})
+    return response
+    """
+    
+    # Better way to do things
+    games = [game.to_dict() for game in Game.query.all()]
+    return make_response(games, 200)
+
+@app.route('/games/<int:id>')
+def game_by_id(id):
+    """
+    game = Game.query.filter(Game.id == id).first()
+    
+    game_dict = {
+        "title": game.title,
+        "genre": game.genre,
+        "platform": game.platform,
+        "price": game.price
+    }
+    
+    response = make_response(game_dict, 200)
+    return response
+    """
+    game_dict = Game.query.filter(Game.id == id).first().to_dict()
+    return make_response(game_dict, 200)
+
+@app.route('/games/users/<int:id>')
+def game_users_by_id(id):
+    game = Game.query.filter(Game.id == id).first()
+    users = [user.to_dict(rules=("-reviews",)) for user in game.users]
+    return make_response(users, 200)
 
 
 if __name__ == '__main__':
